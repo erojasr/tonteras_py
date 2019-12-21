@@ -7,6 +7,7 @@ page = 1
 url = 'https://news.ycombinator.com/news'
 links = []
 subtext = []
+data = []
 while True:
 
     try:
@@ -38,6 +39,8 @@ while True:
     links.append(soup.select('.storylink'))
     subtext.append(soup.select('.subtext'))
 
+    #data.append({'links': soup.select('.storylink'), 'subtext': soup.select('.subtext')})
+
     #print(len(links))
 
     page += 1
@@ -45,22 +48,21 @@ else:
     print('done reading pages')
 
 
-
-#print(links)
-
 def sort_stories_by_votes(hnlist):
     return sorted(hnlist, key= lambda k:k['votes'], reverse=True)
+
 
 def create_custom_hn(links, subtext):
     hn = [] # new list hacker news
     for index, item in enumerate(links):
-        title = links[index].getText()
-        href = links[index].get('href', None)
-        vote = subtext[index].select('.score')
-        points = 0
-        if len(vote):
-            points = int(vote[0].getText().replace(' points', ''))
-        hn.append({'title': title, 'link': href, 'votes': points})
+        for idx, value in enumerate(item):
+            title = item[idx].getText()
+            href = item[idx].get('href', None)
+            vote = subtext[index][idx].select('.score')
+            points = 0
+            if len(vote):
+                points = int(vote[0].getText().replace(' points', ''))
+            hn.append({'title': title, 'link': href, 'votes': points})
 
     return sort_stories_by_votes(hn)
 

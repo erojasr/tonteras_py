@@ -2,12 +2,12 @@ import requests
 from bs4 import BeautifulSoup
     
 
-res = requests.get('https://news.ycombinator.com/news?p=14')
+res = requests.get('https://news.ycombinator.com/news?p=15')
 
 #print(res.text)
 
 soup = BeautifulSoup(res.text, 'html.parser')
-#print(soup.select('.athing'))
+print(soup.select('.athing'))
 #print(soup.body.contents)
 #print(soup.find_all('a'))
 #print(soup.find(id='score_20514755'))
@@ -16,7 +16,7 @@ soup = BeautifulSoup(res.text, 'html.parser')
 links = soup.select('.storylink')
 #votes = soup.select('.score')
 subtext = soup.select('.subtext')
-print(links);
+
 #print(votes[0])
 def sort_stories_by_votes(hnlist):
     return sorted(hnlist, key= lambda k:k['votes'], reverse=True)
