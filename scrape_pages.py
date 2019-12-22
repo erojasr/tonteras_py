@@ -2,6 +2,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
+import tabulate
 
 page = 1
 url = 'https://news.ycombinator.com/news'
@@ -18,6 +19,7 @@ while True:
         session.mount('https://', adapter)
 
         if page == 1:
+            print(url)
             res = session.get(url)
         else:
             print(url+'?p='+str(page))
@@ -38,6 +40,9 @@ while True:
 
     links.append(soup.select('.storylink'))
     subtext.append(soup.select('.subtext'))
+
+    if page == 3:
+        break
 
     #data.append({'links': soup.select('.storylink'), 'subtext': soup.select('.subtext')})
 
@@ -62,10 +67,16 @@ def create_custom_hn(links, subtext):
             points = 0
             if len(vote):
                 points = int(vote[0].getText().replace(' points', ''))
-            hn.append({'title': title, 'link': href, 'votes': points})
+            #hn.append({'title': title, 'link': href, 'votes': points})
+            hn.append({'title': title, 'votes': points})
 
     return sort_stories_by_votes(hn)
 
 
-xd = create_custom_hn(links, subtext)
-print(xd)
+dataset = create_custom_hn(links, subtext)
+
+header = dataset[0].keys()
+#print(header)
+rows = [article.values() for article in dataset]
+print(tabulate.tabulate(rows, header, tablefmt='grid'))
+
