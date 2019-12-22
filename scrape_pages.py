@@ -3,12 +3,15 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 import tabulate
-
+import pandas as pd
+import itertools
 page = 1
 url = 'https://news.ycombinator.com/news'
 links = []
 subtext = []
 data = []
+votes = []
+titles = []
 while True:
 
     try:
@@ -37,17 +40,32 @@ while True:
     content = soup.select('.athing')
     if not content:
         break
+    
+    #data_marky = {'links':}
+    #links.append(soup.select('.storylink')) #.getText())
+    #links.append([x.get('href') for x in soup.select('.storylink')])
+    #votes.append([int(link.find('span', class_='score').getText().replace(' points','')) if link.find('span', class_='score') else 0 for link in soup.select('.subtext')])
+    #titles.append([z.getText() for z in soup.select('.storylink')])
+  
+    links  += [x.get('href') for x in soup.select('.storylink')]    
+    votes  += [int(link.find('span',class_='score').getText().replace(' points','')) if link.find('span', class_='score') else 0 for link in soup.select('.subtext')]
+    titles += [z.getText() for z in soup.select('.storylink')]
+    #[y.getText().replace(' points','') if len(y) else 0 for y in soup.select('.score')]
+    
 
-    links.append(soup.select('.storylink'))
-    subtext.append(soup.select('.subtext'))
+    #for y in soup.select('.score'):
+    #    if len(y):
+    #        votes.append(y.getText().replace('points',''))
+    #    else:
+    #        votes.append(0)
 
-    if page == 3:
-        break
+    #if page == 3:
+    #   break
 
     #data.append({'links': soup.select('.storylink'), 'subtext': soup.select('.subtext')})
 
     #print(len(links))
-
+    
     page += 1
 else:
     print('done reading pages')
@@ -67,16 +85,34 @@ def create_custom_hn(links, subtext):
             points = 0
             if len(vote):
                 points = int(vote[0].getText().replace(' points', ''))
-            #hn.append({'title': title, 'link': href, 'votes': points})
-            hn.append({'title': title, 'votes': points})
+            hn.append({'title': title, 'link': href, 'votes': points})
+            #hn.append({'title': title, 'votes': points})
 
     return sort_stories_by_votes(hn)
 
+#print([len(value) for a,value in enumerate(titles)])
+#print([len(value) for a,value in enumerate(links)])
+#print([len(value) for a,value in enumerate(votes)])
+#print(titles[0])
+#print(len(titles))
+#print(len(links))
+#print(len(votes))
+#dataset = create_custom_hn(links, subtext)
+#data = list(map(list.__add__,titles,links))
 
-dataset = create_custom_hn(links, subtext)
+#data = titles+links+votes
 
-header = dataset[0].keys()
+#data = [a + b + c for a, b, c in zip(titles, links, votes)]
+
+#dataframe = pd.DataFrame.from_records(data)
+#print (dataframe)
+#dataframe = pd.DataFrame([list(itertools.chain(*i)) for i in zip(titles, links, votes)], columns=['Title','Link','Votes'])
+dataframe = pd.DataFrame(list(zip(titles,links,votes)), columns=['Title','Link','Votes'])
+dataframe['Votes'] = pd.to_numeric(dataframe['Votes'])
+print(dataframe.sort_values(by='Votes', ascending = False))
+#header = dataset[0].keys()
+#
 #print(header)
-rows = [article.values() for article in dataset]
-print(tabulate.tabulate(rows, header, tablefmt='grid'))
+#rows = [article.values() for article in dataset]
+#print(tabulate.tabulate(rows, header, tablefmt='grid'))
 
