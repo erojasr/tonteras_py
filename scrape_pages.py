@@ -6,7 +6,7 @@ import pandas as pd
 
 page = 1
 url = 'https://news.ycombinator.com/news'
-links, votes, titles = [],[],[]
+links, votes, titles, ages = [], [], [], []
 while True:
 
     try:
@@ -36,10 +36,10 @@ while True:
         print('We don\'t have more data to extract')
         break
   
-    links  += [x.get('href') for x in soup.select('.storylink')]    
-    votes  += [int(link.find('span',class_='score').getText().replace(' points','')) if link.find('span', class_='score') else 0 for link in soup.select('.subtext')]
-    titles += [z.getText() for z in soup.select('.storylink')]
-
+    links  += [link.get('href') for link in soup.select('.storylink')]
+    votes  += [int(points.find('span', class_='score').getText().replace(' points', '')) if points.find('span', class_='score') else 0 for points in soup.select('.subtext')]
+    titles += [title.getText() for title in soup.select('.storylink')]
+    ages   += [age.find('span', class_='age').getText().replace(' ago',"")  for age in soup.select('.subtext')]
 
     #if page == 3:
     #   break
@@ -47,7 +47,7 @@ while True:
     page += 1
 
 # displaying data
-dataframe = pd.DataFrame(list(zip(titles,links,votes)), columns=['Title','Link','Votes'])
-print(dataframe.sort_values(by='Votes', ascending = False))
+dataframe = pd.DataFrame(list(zip(titles,links,votes, ages)), columns=['Title', 'Link', 'Votes', 'Age'])
+print(dataframe.sort_values(by='Votes', ascending=False))
 
 
